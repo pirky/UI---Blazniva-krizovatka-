@@ -54,44 +54,34 @@ def print_crossroad(crossroad):
     print("\n")
 
 
-def right(state, car_position):
-    car = state.cars[car_position]
-    crossroad = state.crossroad
-    for i in range(car.size):
-        crossroad[car.line][car.column + i] = '0'
-    car.column += 1
-    for i in range(car.size):
-        crossroad[car.line][car.column + i] = '1'
-
-
-def left(state, car_position):
-    car = state.cars[car_position]
-    crossroad = state.crossroad
-    for i in range(car.size):
-        crossroad[car.line][car.column + i] = '0'
-    car.column -= 1
-    for i in range(car.size):
-        crossroad[car.line][car.column + i] = '1'
-
-
-def up(state, car_position):
-    car = state.cars[car_position]
-    crossroad = state.crossroad
-    for i in range(car.size):
-        crossroad[car.line + i][car.column] = '0'
-    car.line -= 1
-    for i in range(car.size):
-        crossroad[car.line + i][car.column] = '1'
-
-
-def down(state, car_position):
-    car = state.cars[car_position]
-    crossroad = state.crossroad
-    for i in range(car.size):
-        crossroad[car.line + i][car.column] = '0'
-    car.line += 1
-    for i in range(car.size):
-        crossroad[car.line + i][car.column] = '1'
+def operator(crossroad, cars, car_name, direction):
+    first = car_line = car_column = i = 0
+    for line in crossroad:
+        j = 0
+        for char in line:
+            if char == car_name:
+                crossroad[i][j] = "0"
+                if first == 0:
+                    first = 1
+                    if direction == "right":
+                        car_line = i
+                        car_column = j + 1
+                    elif direction == "left":
+                        car_line = i
+                        car_column = j - 1
+                    elif direction == "up":
+                        car_line = i - 1
+                        car_column = j
+                    elif direction == "down":
+                        car_line = i + 1
+                        car_column = j
+            j += 1
+        i += 1
+    for i in range(cars[car_name]["size"]):
+        if direction == "right" or direction == "left":
+            crossroad[car_line][car_column + i] = car_name
+        else:
+            crossroad[car_line + i][car_column] = car_name
 
 
 def max_step(car, crossroad, direction):
@@ -135,14 +125,14 @@ def move_combo(state, iteror, visited, stack, depth, direction):
         return 0
     for step in range(1, steps + 1):
         temp = deepcopy(temp)
-        if direction == "right":
-            right(temp, iteror)
-        elif direction == "left":
-            left(temp, iteror)
-        elif direction == "down":
-            down(temp, iteror)
-        elif direction == "up":
-            up(temp, iteror)
+        # if direction == "right":
+        #     right(temp, iteror)
+        # elif direction == "left":
+        #     left(temp, iteror)
+        # elif direction == "down":
+        #     down(temp, iteror)
+        # elif direction == "up":
+        #     up(temp, iteror)
 
         if temp in visited:
             index = visited.index(temp)
@@ -154,40 +144,43 @@ def move_combo(state, iteror, visited, stack, depth, direction):
         else:
             stack.append(temp)
 
-        if temp.cars[0].column + temp.cars[0].size - 1 == 5:    # prvé (červené) auto sa nachádza na konci križovatky
+        if temp.cars[0].column + temp.cars[0].size - 1 == 5:  # prvé (červené) auto sa nachádza na konci križovatky
             return 1
     return 0
 
 
-def dfs(first_state, depth):
-    stack = [first_state]
+def dfs(cars, initial_crossroad, depth):
+    stack = [initial_crossroad]
+    number_of_cars = len(cars)
     visited = []
-    while True:
-        if len(stack) == 0:
-            print("{} depth Stack empty. Mission failed going deeper.".format(depth))
-            break
-        state = stack.pop()
-        visited.append(state)
-        if state.depth > depth:
-            continue
-        for i in range(len(state.cars)):
-            if state.cars[i].direction == "h":
-                end = move_combo(state, i, visited, stack, depth, "right")
-                if end == 1:
-                    print_crossroad(stack.pop().crossroad)
-                    return 1
-                move_combo(state, i, visited, stack, depth, "left")
-            elif state.cars[i].direction == "v":
-                move_combo(state, i, visited, stack, depth, "down")
-                move_combo(state, i, visited, stack, depth, "up")
+    print_crossroad(initial_crossroad)
+    operator(initial_crossroad, cars, "F", "left")
+    print_crossroad(initial_crossroad)
+    # while True:
+    #     if len(stack) == 0:
+    #         print("{} depth Stack empty. Mission failed going deeper.".format(depth))
+    #         break
+    #     crossroad = stack.pop()
+    #     visited.append(crossroad)
+    #
+    #     for i in range(number_of_cars):
+    #         if state.cars[i].direction == "h":
+    #             end = move_combo(state, i, visited, stack, depth, "right")
+    #             if end == 1:
+    #                 print_crossroad(stack.pop().crossroad)
+    #                 return 1
+    #             move_combo(state, i, visited, stack, depth, "left")
+    #         elif state.cars[i].direction == "v":
+    #             move_combo(state, i, visited, stack, depth, "down")
+    #             move_combo(state, i, visited, stack, depth, "up")
 
     return 0
 
 
 def iterative_dfs():
-    for depth in range(2):
+    for depth in range(1):
         cars, crossroad = init()
-        end = dfs(state, depth)
+        end = dfs(cars, crossroad, depth)
         if end == 1:
             return
     print("riesenie sa nenaslo")
@@ -205,6 +198,4 @@ def halabala():
     print()
 
 
-halabala()
-
-# start()
+start()
