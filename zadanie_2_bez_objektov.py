@@ -31,19 +31,21 @@ class State:
 
 def init():
     crossroad = [['0'] * 6 for _i in range(6)]
-    cars = []
+    cars = {}
     file = open("cars.txt", "r")
+    char_num = 65
     for line in file:
         arr = line.split()
-        car = Car(int(arr[0]), int(arr[1]) - 1, int(arr[2]) - 1, arr[3])
-        for i in range(car.size):
-            if car.direction == 'v':
-                crossroad[car.line + i][car.column] = '1'
+        car_name = chr(char_num)
+        char_num += 1
+        cars[car_name] = dict([("size", int(arr[0])), ("direction", arr[3])])
+        for i in range(cars[car_name]["size"]):
+            if cars[car_name]["direction"] == 'v':
+                crossroad[int(arr[1]) + i][int(arr[2])] = car_name
             else:
-                crossroad[car.line][car.column + i] = '1'
-        cars.append(car)
+                crossroad[int(arr[1])][int(arr[2]) + i] = car_name
     file.close()
-    return State(crossroad, cars, 0)
+    return cars, crossroad
 
 
 def print_crossroad(crossroad):
@@ -183,8 +185,8 @@ def dfs(first_state, depth):
 
 
 def iterative_dfs():
-    for depth in range(10):
-        state = init()
+    for depth in range(2):
+        cars, crossroad = init()
         end = dfs(state, depth)
         if end == 1:
             return
@@ -199,4 +201,10 @@ def start():
     iterative_dfs()
 
 
-start()
+def halabala():
+    print()
+
+
+halabala()
+
+# start()

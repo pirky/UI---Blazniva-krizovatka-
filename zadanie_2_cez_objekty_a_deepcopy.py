@@ -35,7 +35,7 @@ def init():
     file = open("cars.txt", "r")
     for line in file:
         arr = line.split()
-        car = Car(int(arr[0]), int(arr[1]) - 1, int(arr[2]) - 1, arr[3])
+        car = Car(int(arr[0]), int(arr[1]), int(arr[2]), arr[3])
         for i in range(car.size):
             if car.direction == 'v':
                 crossroad[car.line + i][car.column] = '1'
