@@ -29,16 +29,6 @@ class State:
             return self.crossroad == other.crossroad and self.cars == other.cars
 
 
-class Node:
-    def __init__(self, state, prevnode, visited):
-        self.state = state
-        self.prevNode = prevnode
-        self.visited = visited
-
-    def set_visit(self, visited):
-        self.visited = visited
-
-
 def init():
     crossroad = [['0'] * 6 for _i in range(6)]
     cars = []
@@ -193,11 +183,12 @@ def dfs(first_state, depth):
 
 
 def iterative_dfs():
-    for depth in range(8, 9):
+    for depth in range(10):
         state = init()
         end = dfs(state, depth)
         if end == 1:
-            break
+            return
+    print("riesenie sa nenaslo")
 
 
 def start():
