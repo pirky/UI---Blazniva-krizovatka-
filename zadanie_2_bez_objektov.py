@@ -84,33 +84,47 @@ def operator(crossroad, cars, car_name, direction):
             crossroad[car_line + i][car_column] = car_name
 
 
-def max_step(car, crossroad, direction):
+# vrati poziciu auta
+def find_car(crossroad, car_name):
+    i = 0
+    for line in crossroad:
+        j = 0
+        for char in line:
+            if char == car_name:
+                return i, j
+            j += 1
+        i += 1
+
+
+def max_step(crossroad, car_name, cars, direction):
     steps = 0
+    car_line, car_column = find_car(crossroad, car_name)
+    car_size = cars[car_name]["size"]
     if direction == "right":
-        while car.column + car.size + steps < 6:
-            field = crossroad[car.line][car.column + car.size + steps]
-            if field == '1':
+        while car_column + car_size + steps < 6:
+            field = crossroad[car_line][car_column + car_size + steps]
+            if field != '0':
                 break
             steps += 1
 
     elif direction == "left":
-        while car.column - steps - 1 > -1:
-            field = crossroad[car.line][car.column - steps - 1]
-            if field == '1':
+        while car_column - steps - 1 > -1:
+            field = crossroad[car_line][car_column - steps - 1]
+            if field != '0':
                 break
             steps += 1
 
     elif direction == "down":
-        while car.line + car.size + steps < 6:
-            field = crossroad[car.line + car.size + steps][car.column]
-            if field == '1':
+        while car_line + car_size + steps < 6:
+            field = crossroad[car_line + car_size + steps][car_column]
+            if field != '0':
                 break
             steps += 1
 
     elif direction == "up":
-        while car.line - steps - 1 > -1:
-            field = crossroad[car.line - steps - 1][car.column]
-            if field == '1':
+        while car_line - steps - 1 > -1:
+            field = crossroad[car_line - steps - 1][car_column]
+            if field != '0':
                 break
             steps += 1
 
@@ -118,7 +132,7 @@ def max_step(car, crossroad, direction):
 
 
 def move_combo(state, iteror, visited, stack, depth, direction):
-    steps = max_step(state.cars[iteror], state.crossroad, direction)
+    steps = max_step(state.cars[iteror], state.crossroad, direction, "daco aby nebol vykricnik")
     temp = deepcopy(state)
     temp.depth += 1
     if temp.depth > depth:
@@ -155,6 +169,8 @@ def dfs(cars, initial_crossroad, depth):
     visited = []
     print_crossroad(initial_crossroad)
     operator(initial_crossroad, cars, "F", "left")
+    steps = max_step(initial_crossroad, "B", cars, "right")
+    print(steps)
     print_crossroad(initial_crossroad)
     # while True:
     #     if len(stack) == 0:
