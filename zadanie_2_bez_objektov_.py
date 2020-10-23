@@ -6,7 +6,7 @@ cars = {}
 def init():
     global cars
     crossroad = [['0'] * 6 for _i in range(6)]
-    file = open("cars.txt", "r")
+    file = open("maps/zakladny.txt", "r")
     char_num = 65
     for line in file:
         arr = line.split()
@@ -126,7 +126,6 @@ def move_combo(crossroad, car_name, visited, visited_depths, stack, stack_depths
                 stack_depths.append(curr_depth)
                 visited[index] = temp
                 visited_depths[index] = curr_depth
-                break
         else:
             stack.append(temp)
             stack_depths.append(curr_depth)
@@ -175,7 +174,7 @@ def dfs(initial_crossroad, depth):
 
 def iterative_dfs():
     global cars
-    for depth in range(9):
+    for depth in range(18):
         crossroad = init()
         end = dfs(crossroad, depth)
         if end == 1:
