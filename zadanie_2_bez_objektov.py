@@ -1,37 +1,11 @@
-from copy import *
+import time
 
-
-class Car:
-    def __init__(self, size, line, column, direction):
-        self.size = size
-        self.line = line
-        self.column = column
-        self.direction = direction
-
-    def __eq__(self, other):
-        if not isinstance(other, Car):
-            return NotImplemented
-        else:
-            return self.size == other.size and self.line == other.line and \
-                   self.column == other.column and self.direction == other.direction
-
-
-class State:
-    def __init__(self, crossroad, cars, depth):
-        self.crossroad = crossroad
-        self.cars = cars
-        self.depth = depth
-
-    def __eq__(self, other):
-        if not isinstance(other, State):
-            return NotImplemented
-        else:
-            return self.crossroad == other.crossroad and self.cars == other.cars
+cars = {}
 
 
 def init():
+    global cars
     crossroad = [['0'] * 6 for _i in range(6)]
-    cars = {}
     file = open("cars.txt", "r")
     char_num = 65
     for line in file:
@@ -45,7 +19,7 @@ def init():
             else:
                 crossroad[int(arr[1])][int(arr[2]) + i] = car_name
     file.close()
-    return cars, crossroad
+    return crossroad
 
 
 def print_crossroad(crossroad):
@@ -54,7 +28,8 @@ def print_crossroad(crossroad):
     print("\n")
 
 
-def operator(crossroad, cars, car_name, direction):
+def operator(crossroad, car_name, direction):
+    global cars
     first = car_line = car_column = i = 0
     for line in crossroad:
         j = 0
@@ -94,9 +69,11 @@ def find_car(crossroad, car_name):
                 return i, j
             j += 1
         i += 1
+    return None, None
 
 
-def max_step(crossroad, car_name, cars, direction):
+def max_step(crossroad, car_name, direction):
+    global cars
     steps = 0
     car_line, car_column = find_car(crossroad, car_name)
     car_size = cars[car_name]["size"]
@@ -131,87 +108,90 @@ def max_step(crossroad, car_name, cars, direction):
     return steps
 
 
-def move_combo(state, iteror, visited, stack, depth, direction):
-    steps = max_step(state.cars[iteror], state.crossroad, direction, "daco aby nebol vykricnik")
-    temp = deepcopy(state)
-    temp.depth += 1
-    if temp.depth > depth:
+def move_combo(crossroad, car_name, visited, visited_depths, stack, stack_depths, curr_depth, depth, direction):
+    global cars
+    steps = max_step(crossroad, car_name, direction)
+    temp = [list(x) for x in crossroad]
+    curr_depth += 1
+    if curr_depth > depth:
         return 0
     for step in range(1, steps + 1):
-        temp = deepcopy(temp)
-        # if direction == "right":
-        #     right(temp, iteror)
-        # elif direction == "left":
-        #     left(temp, iteror)
-        # elif direction == "down":
-        #     down(temp, iteror)
-        # elif direction == "up":
-        #     up(temp, iteror)
+        temp = [list(x) for x in temp]
+        operator(temp, car_name, direction)
 
         if temp in visited:
             index = visited.index(temp)
-            if temp == visited[index] and temp.depth < visited[index].depth:
+            if curr_depth < visited_depths[index]:
                 stack.append(temp)
-                visited.remove(visited[index])
-                visited.append(temp)
+                stack_depths.append(curr_depth)
+                visited[index] = temp
+                visited_depths[index] = curr_depth
                 break
         else:
             stack.append(temp)
+            stack_depths.append(curr_depth)
 
-        if temp.cars[0].column + temp.cars[0].size - 1 == 5:  # prvé (červené) auto sa nachádza na konci križovatky
-            return 1
+        for i in range(len(temp)):     # prvé (červené) auto sa nachádza na konci križovatky
+            if temp[i][5] == 'A':
+                print("finito")
+                return 1
     return 0
 
 
-def dfs(cars, initial_crossroad, depth):
+def dfs(initial_crossroad, depth):
+    global cars
+    curr_depth = 0
     stack = [initial_crossroad]
-    number_of_cars = len(cars)
+    stack_depths = [curr_depth]
     visited = []
-    print_crossroad(initial_crossroad)
-    operator(initial_crossroad, cars, "F", "left")
-    steps = max_step(initial_crossroad, "B", cars, "right")
-    print(steps)
-    print_crossroad(initial_crossroad)
-    # while True:
-    #     if len(stack) == 0:
-    #         print("{} depth Stack empty. Mission failed going deeper.".format(depth))
-    #         break
-    #     crossroad = stack.pop()
-    #     visited.append(crossroad)
-    #
-    #     for i in range(number_of_cars):
-    #         if state.cars[i].direction == "h":
-    #             end = move_combo(state, i, visited, stack, depth, "right")
-    #             if end == 1:
-    #                 print_crossroad(stack.pop().crossroad)
-    #                 return 1
-    #             move_combo(state, i, visited, stack, depth, "left")
-    #         elif state.cars[i].direction == "v":
-    #             move_combo(state, i, visited, stack, depth, "down")
-    #             move_combo(state, i, visited, stack, depth, "up")
+    visited_depths = []
+    while True:
+        if len(stack) == 0:
+            print("{} depth. Stack empty. Mission failed going deeper.".format(depth))
+            break
+        crossroad = stack.pop()
+        curr_depth = stack_depths.pop()
+        if curr_depth > depth:
+            continue
+        visited.append(crossroad)
+        visited_depths.append(curr_depth)
+        for car_name in cars.keys():
+            if cars[car_name]["direction"] == "h":
+                end = move_combo(crossroad, car_name, visited, visited_depths, stack, stack_depths, curr_depth,
+                                 depth, "right")
+                if end == 1:
+                    print_crossroad(stack.pop())
+                    return 1
+                move_combo(crossroad, car_name, visited, visited_depths, stack, stack_depths, curr_depth,
+                           depth, "left")
+            elif cars[car_name]["direction"] == "v":
+                move_combo(crossroad, car_name, visited, visited_depths, stack, stack_depths, curr_depth,
+                           depth, "down")
+                move_combo(crossroad, car_name, visited, visited_depths, stack, stack_depths, curr_depth,
+                           depth, "up")
 
     return 0
 
 
 def iterative_dfs():
-    for depth in range(1):
-        cars, crossroad = init()
-        end = dfs(cars, crossroad, depth)
+    global cars
+    for depth in range(9):
+        crossroad = init()
+        end = dfs(crossroad, depth)
         if end == 1:
             return
     print("riesenie sa nenaslo")
 
 
 def start():
+    start_time = time.time()
     print("""-------------------------------------------------------------
     Dobrý večer, dobrý večer. Hráte hru Multikrižovatkár.
    -------------------------------------------------------
     """)
     iterative_dfs()
-
-
-def halabala():
-    print()
+    end_time = time.time()
+    print("Compilation time: {} seconds".format(round(end_time - start_time, 2)))
 
 
 start()
