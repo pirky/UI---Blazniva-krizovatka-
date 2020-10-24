@@ -1,4 +1,5 @@
 import time
+import datetime
 from colorama import Fore
 
 
@@ -27,6 +28,51 @@ def init(file_path):
                 crossroad[int(arr[1])][int(arr[2]) + i] = car_name
     file.close()
     return crossroad
+
+
+# vypíše poradie operátorov
+def print_operators(crossroad_1, crossroad_2):
+    cars_1 = {}
+    cars_2 = {}
+    car_line = 0
+    for line in crossroad_1:
+        car_column = 0
+        for char in line:
+            if char != "0":
+                if char not in cars_1:
+                    cars_1[char] = {"line": car_line, "column": car_column, "size": 1}
+                else:
+                    cars_1[char]["size"] += 1
+            car_column += 1
+        car_line += 1
+
+    car_line = 0
+    for line in crossroad_2:
+        car_column = 0
+        for char in line:
+            if char != "0":
+                if char not in cars_2:
+                    cars_2[char] = {"line": car_line, "column": car_column, "size": 1}
+                else:
+                    cars_2[char]["size"] += 1
+            car_column += 1
+        car_line += 1
+
+    car_name = 65
+    for i in range(len(cars_1)):
+        if cars_1[chr(car_name + i)] != cars_2[chr(car_name + i)]:
+            if cars_1[chr(car_name + i)]["line"] == cars_2[chr(car_name + i)]["line"]:
+                move = cars_1[chr(car_name + i)]["column"] - cars_2[chr(car_name + i)]["column"]
+                if move < 0:
+                    print("\n\"{}\" -> {} right.".format(chr(car_name + i), abs(move)))
+                else:
+                    print("\n\"{}\" -> {} left.".format(chr(car_name + i), abs(move)))
+            else:
+                move = cars_1[chr(car_name + i)]["line"] - cars_2[chr(car_name + i)]["line"]
+                if move < 0:
+                    print("\n\"{}\" -> {} down.".format(chr(car_name + i), abs(move)))
+                else:
+                    print("\n\"{}\" -> {} up.".format(chr(car_name + i), abs(move)))
 
 
 # Farebné vypísanie križovatky
@@ -176,21 +222,21 @@ def edit_visited(curr_depth, crossroad):
     global visited
     global visited_depths
 
-    if visited_depths[-1] < curr_depth:  # ak som v nižšej hľbke pridám stav križovatky do cesty
+    if visited_depths[-1] < curr_depth:         # ak som v nižšej hľbke pridám stav križovatky do cesty
         visited.append(crossroad)
         visited_depths.append(curr_depth)
-    elif visited_depths[-1] == curr_depth:  # ak som na rovnakej hĺbke, tak vymením križovatky
+    elif visited_depths[-1] == curr_depth:      # ak som na rovnakej hĺbke, tak vymením križovatky
         visited[-1] = crossroad
     else:
         while visited_depths[-1] > curr_depth:  # vymazávam križovatky pokiaľ nie som na rovnakej hĺbke,
-            visited.pop()  # z akej sa chystám pokračovať v prehľadávaní
-            visited_depths.pop()  # nakoniec vymením križovatky
+            visited.pop()                       # z akej sa chystám pokračovať v prehľadávaní
+            visited_depths.pop()                # nakoniec vymením križovatky
         visited[-1] = crossroad
         visited_depths[-1] = curr_depth
 
 
 # algoritmus prehľadávania do hĺbky
-def dfs(initial_crossroad, depth):
+def dfs(initial_crossroad, depth, debug):
     global cars
     global visited
     global visited_depths
@@ -211,9 +257,18 @@ def dfs(initial_crossroad, depth):
         curr_depth = stack_depths.pop()
         edit_visited(curr_depth, crossroad)
 
+        if debug:
+            print("\nCurrent depth -> {}\nMax depth -> {}".format(curr_depth, depth))
+            if curr_depth > 0:
+                print("\nParent crossroad")
+                print_crossroad(visited[-2])
+                print_operators(visited[-2], visited[-1])
+            print_crossroad(visited[-1])
+            input("\nPress \"Enter\" to continue\t")
+
         for i in range(len(crossroad)):  # prvé (červené) auto sa nachádza na konci križovatky
             if crossroad[i][5] == 'A':
-                print("{} depth. najdene riesenie".format(depth))
+                print("{} depth. This is the end.".format(depth))
                 return 1
 
         if curr_depth == depth:
@@ -229,11 +284,11 @@ def dfs(initial_crossroad, depth):
 
 
 # spustí DFS so zvyšujúcou sa hĺbkou
-def iterative_dfs():
+def iterative_dfs(debug, file_path):
     global cars
-    for depth in range(10):
-        crossroad = init("maps/cars_1.txt")
-        end = dfs(crossroad, depth)
+    crossroad = init(file_path)
+    for depth in range(15):
+        end = dfs(crossroad, depth, debug)
         if end == 1:
             return 1
     return 0
@@ -245,18 +300,30 @@ def start():
     Dobrý večer, dobrý večer. Hráte hru Multikrižovatkár.
    -------------------------------------------------------
     """)
+    file_path = input("Zadajte cestu k súboru\t")       # maps/cars_1.txt
+    debug = input("Stlačte 1 pre spustenie debug módu\t")
+    print()
+    if debug == "1":
+        debug = True
+    else:
+        debug = False
+
     start_time = time.time()
-    done = iterative_dfs()
+    done = iterative_dfs(debug, file_path)
     end_time = time.time()
     if done == 1:
         counter = 0
         for cross in visited:
-            print("\n{}. move".format(counter))
+            if 0 < counter < len(visited):
+                print("\n{}. move".format(counter))
+                print_operators(visited[counter - 1], visited[counter])
+            else:
+                print("\nStarting crossroad:")
             print_crossroad(cross)
             counter += 1
     else:
-        print("riesenie sa nenaslo")
-    print("Compilation time: {} seconds".format(round(end_time - start_time, 2)))
+        print("No resolution found.")
+    print("\nCompilation time: {}".format(datetime.timedelta(seconds=round(end_time - start_time, 0))))
 
 
 start()
