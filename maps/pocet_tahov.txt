@@ -1,0 +1,8 @@
+zakladny 8
+cars_1 8
+cars_2 11
+cars_3 14
+cars_4 20
+cars_5 29
+cars_6 18
+final_boss 51
