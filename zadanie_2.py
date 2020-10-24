@@ -152,13 +152,18 @@ def dfs(initial_crossroad, depth):
             visited_depths.append(curr_depth)
         elif visited_depths[-1] == curr_depth:
             visited[-1] = crossroad
-            visited_depths[-1] = curr_depth
         else:
-            visited.pop()
-            visited_depths.pop()
+            while visited_depths[-1] > curr_depth:
+                visited.pop()
+                visited_depths.pop()
+            visited[-1] = crossroad
+            visited_depths[-1] = curr_depth
+
         for i in range(len(crossroad)):     # prvé (červené) auto sa nachádza na konci križovatky
             if crossroad[i][5] == 'A':
+                print("{} depth. najdene riesenie".format(depth))
                 return 1
+
         if curr_depth == depth:
             continue
         for car_name in cars.keys():
@@ -172,27 +177,29 @@ def dfs(initial_crossroad, depth):
 
 def iterative_dfs():
     global cars
-    for depth in range(8, 9):
-        crossroad = init("maps/zakladny.txt")
+    for depth in range(8):
+        crossroad = init("maps/cars_1.txt")
         end = dfs(crossroad, depth)
         if end == 1:
-            counter = 0
-            for cross in visited:
-                print("{}. move".format(counter))
-                print_crossroad(cross)
-                counter += 1
-            return
+            return 1
     print("riesenie sa nenaslo")
+    return 0
 
 
 def start():
-    start_time = time.time()
     print("""-------------------------------------------------------------
     Dobrý večer, dobrý večer. Hráte hru Multikrižovatkár.
    -------------------------------------------------------
     """)
-    iterative_dfs()
+    start_time = time.time()
+    done = iterative_dfs()
     end_time = time.time()
+    if done == 1:
+        counter = 0
+        for cross in visited:
+            print("{}. move".format(counter))
+            print_crossroad(cross)
+            counter += 1
     print("Compilation time: {} seconds".format(round(end_time - start_time, 2)))
 
 
