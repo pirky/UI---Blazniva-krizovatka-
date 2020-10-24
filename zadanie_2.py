@@ -1,4 +1,6 @@
 import time
+from colorama import Fore
+
 
 cars = {}
 visited = []
@@ -7,6 +9,7 @@ stack = []
 stack_depths = []
 
 
+# Načítanie prvej križovatky a info o autách
 def init(file_path):
     global cars
     crossroad = [['0'] * 6 for _i in range(6)]
@@ -26,20 +29,56 @@ def init(file_path):
     return crossroad
 
 
+# Farebné vypísanie križovatky
 def print_crossroad(crossroad):
+    print()
     for line in crossroad:
-        print(line)
-    print("\n")
+        for char in line:
+            if char == "0":
+                print(char, end=' ')
+            elif ord(char) % 15 == 0:
+                print(Fore.LIGHTYELLOW_EX + char, end=' ')
+            elif ord(char) % 15 == 1:
+                print(Fore.LIGHTBLACK_EX + char, end=' ')
+            elif ord(char) % 15 == 2:
+                print(Fore.LIGHTWHITE_EX + char, end=' ')
+            elif ord(char) % 15 == 4:
+                print(Fore.LIGHTRED_EX + char, end=' ')
+            elif ord(char) % 15 == 5:
+                print(Fore.RED + char, end=' ')
+            elif ord(char) % 15 == 6:
+                print(Fore.CYAN + char, end=' ')
+            elif ord(char) % 15 == 7:
+                print(Fore.YELLOW + char, end=' ')
+            elif ord(char) % 15 == 8:
+                print(Fore.GREEN + char, end=' ')
+            elif ord(char) % 15 == 9:
+                print(Fore.BLUE + char, end=' ')
+            elif ord(char) % 15 == 10:
+                print(Fore.MAGENTA + char, end=' ')
+            elif ord(char) % 15 == 11:
+                print(Fore.LIGHTBLUE_EX + char, end=' ')
+            elif ord(char) % 15 == 12:
+                print(Fore.LIGHTCYAN_EX + char, end=' ')
+            elif ord(char) % 15 == 13:
+                print(Fore.LIGHTGREEN_EX + char, end=' ')
+            elif ord(char) % 15 == 14:
+                print(Fore.LIGHTMAGENTA_EX + char, end=' ')
+            print(Fore.RESET, end='')
+
+        print()
 
 
+# Posun auta daným smerom
 def operator(crossroad, car_name, direction):
     global cars
     first = car_line = car_column = i = 0
+
     for line in crossroad:
         j = 0
         for char in line:
             if char == car_name:
-                crossroad[i][j] = "0"
+                crossroad[i][j] = "0"  # vynuluje pozíciu auta
                 if first == 0:
                     first = 1
                     if direction == "right":
@@ -56,14 +95,15 @@ def operator(crossroad, car_name, direction):
                         car_column = j
             j += 1
         i += 1
-    for i in range(cars[car_name]["size"]):
+
+    for i in range(cars[car_name]["size"]):  # umiestni auto na jeho novú pozíciu
         if direction == "right" or direction == "left":
             crossroad[car_line][car_column + i] = car_name
         else:
             crossroad[car_line + i][car_column] = car_name
 
 
-# vrati poziciu auta
+# vrati x(riadok),y(stĺpec) poziciu auta v križovatke
 def find_car(crossroad, car_name):
     i = 0
     for line in crossroad:
@@ -76,12 +116,13 @@ def find_car(crossroad, car_name):
     return None, None
 
 
+# vráti o koľko sa môže maximálne posunúť auto daným smerom
 def max_step(crossroad, car_name, direction):
     global cars
     steps = 0
     car_line, car_column = find_car(crossroad, car_name)
-
     car_size = cars[car_name]["size"]
+
     if direction == "right":
         while car_column + car_size + steps < 6:
             field = crossroad[car_line][car_column + car_size + steps]
@@ -113,23 +154,42 @@ def max_step(crossroad, car_name, direction):
     return steps
 
 
+# pridá do stacku každé možné rozloženie aut, ak sa také už nenachádza v ceste od koreňa k danému uzlu
 def move_combo(crossroad, car_name, curr_depth, depth, direction):
     global cars
     global visited
     steps = max_step(crossroad, car_name, direction)
-    temp = [list(x) for x in crossroad]
     curr_depth += 1
     if curr_depth > depth:
         return
     for step in range(1, steps + 1):
-        temp = [list(x) for x in temp]
-        operator(temp, car_name, direction)
+        crossroad = [list(x) for x in crossroad]
+        operator(crossroad, car_name, direction)
 
-        if temp not in visited:
-            stack.append(temp)
+        if crossroad not in visited:
+            stack.append(crossroad)
             stack_depths.append(curr_depth)
 
 
+# upraví súčasnú cestu od koreňa k prehľadávanému vrcholu
+def edit_visited(curr_depth, crossroad):
+    global visited
+    global visited_depths
+
+    if visited_depths[-1] < curr_depth:  # ak som v nižšej hľbke pridám stav križovatky do cesty
+        visited.append(crossroad)
+        visited_depths.append(curr_depth)
+    elif visited_depths[-1] == curr_depth:  # ak som na rovnakej hĺbke, tak vymením križovatky
+        visited[-1] = crossroad
+    else:
+        while visited_depths[-1] > curr_depth:  # vymazávam križovatky pokiaľ nie som na rovnakej hĺbke,
+            visited.pop()  # z akej sa chystám pokračovať v prehľadávaní
+            visited_depths.pop()  # nakoniec vymením križovatky
+        visited[-1] = crossroad
+        visited_depths[-1] = curr_depth
+
+
+# algoritmus prehľadávania do hĺbky
 def dfs(initial_crossroad, depth):
     global cars
     global visited
@@ -141,32 +201,25 @@ def dfs(initial_crossroad, depth):
     stack_depths = [curr_depth]
     visited = [initial_crossroad]
     visited_depths = [curr_depth]
+
     while True:
         if len(stack) == 0:
             print("{} depth. Stack empty. Mission failed going deeper.".format(depth))
             return 0
+
         crossroad = stack.pop()
         curr_depth = stack_depths.pop()
-        if visited_depths[-1] < curr_depth:
-            visited.append(crossroad)
-            visited_depths.append(curr_depth)
-        elif visited_depths[-1] == curr_depth:
-            visited[-1] = crossroad
-        else:
-            while visited_depths[-1] > curr_depth:
-                visited.pop()
-                visited_depths.pop()
-            visited[-1] = crossroad
-            visited_depths[-1] = curr_depth
+        edit_visited(curr_depth, crossroad)
 
-        for i in range(len(crossroad)):     # prvé (červené) auto sa nachádza na konci križovatky
+        for i in range(len(crossroad)):  # prvé (červené) auto sa nachádza na konci križovatky
             if crossroad[i][5] == 'A':
                 print("{} depth. najdene riesenie".format(depth))
                 return 1
 
         if curr_depth == depth:
             continue
-        for car_name in cars.keys():
+
+        for car_name in cars.keys():  # všetky možné posuny v danej križovatke sa pridajú do stacku
             if cars[car_name]["direction"] == "h":
                 move_combo(crossroad, car_name, curr_depth, depth, "right")
                 move_combo(crossroad, car_name, curr_depth, depth, "left")
@@ -175,17 +228,18 @@ def dfs(initial_crossroad, depth):
                 move_combo(crossroad, car_name, curr_depth, depth, "up")
 
 
+# spustí DFS so zvyšujúcou sa hĺbkou
 def iterative_dfs():
     global cars
-    for depth in range(8):
+    for depth in range(10):
         crossroad = init("maps/cars_1.txt")
         end = dfs(crossroad, depth)
         if end == 1:
             return 1
-    print("riesenie sa nenaslo")
     return 0
 
 
+# začiatok programu, zobrazí úvodné menu
 def start():
     print("""-------------------------------------------------------------
     Dobrý večer, dobrý večer. Hráte hru Multikrižovatkár.
@@ -197,9 +251,11 @@ def start():
     if done == 1:
         counter = 0
         for cross in visited:
-            print("{}. move".format(counter))
+            print("\n{}. move".format(counter))
             print_crossroad(cross)
             counter += 1
+    else:
+        print("riesenie sa nenaslo")
     print("Compilation time: {} seconds".format(round(end_time - start_time, 2)))
 
 
