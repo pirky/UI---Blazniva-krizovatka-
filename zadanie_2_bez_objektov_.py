@@ -14,7 +14,7 @@ path_depths = []
 def init_bez_objektov():
     global cars
     crossroad = [['0'] * 6 for _i in range(6)]
-    file = open("maps/zakladny.txt", "r")
+    file = open("maps/cars_5.txt", "r")
     char_num = 65
     for line in file:
         arr = line.split()

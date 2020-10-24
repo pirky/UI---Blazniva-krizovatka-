@@ -2,4 +2,5 @@ zakladny 8
 cars_1 8
 cars_2 11
 cars_3 4
-cars_4 
+cars_4 3
+cars_5 9

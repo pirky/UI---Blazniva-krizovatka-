@@ -284,10 +284,10 @@ def dfs(initial_crossroad, depth, debug):
 
 
 # spustí DFS so zvyšujúcou sa hĺbkou
-def iterative_dfs(debug, file_path):
+def iterative_dfs(debug, file_path, max_depth):
     global cars
     crossroad = init(file_path)
-    for depth in range(15):
+    for depth in range(max_depth):
         end = dfs(crossroad, depth, debug)
         if end == 1:
             return 1
@@ -300,30 +300,35 @@ def start():
     Dobrý večer, dobrý večer. Hráte hru Multikrižovatkár.
    -------------------------------------------------------
     """)
-    file_path = input("Zadajte cestu k súboru\t")       # maps/cars_1.txt
-    debug = input("Stlačte 1 pre spustenie debug módu\t")
+    # file_path = input("Zadajte cestu k súboru\t")       # maps/cars_1.txt
+    # max_depth = int(input("Zadajte hĺbku, do ktorej má program prehľadávať:\t"))
+    max_depth = 15
+    file_path = "maps/cars_4.txt"
+    # debug = input("Stlačte 1 pre spustenie debug módu\t")
     print()
+    debug = False
     if debug == "1":
         debug = True
     else:
         debug = False
 
     start_time = time.time()
-    done = iterative_dfs(debug, file_path)
+    done = iterative_dfs(debug, file_path, max_depth)
     end_time = time.time()
     if done == 1:
         counter = 0
-        for cross in visited:
+        for crossroad in visited:
             if 0 < counter < len(visited):
                 print("\n{}. move".format(counter))
                 print_operators(visited[counter - 1], visited[counter])
             else:
                 print("\nStarting crossroad:")
-            print_crossroad(cross)
+            print_crossroad(crossroad)
             counter += 1
     else:
         print("No resolution found.")
-    print("\nCompilation time: {}".format(datetime.timedelta(seconds=round(end_time - start_time, 0))))
+    print("\nCompilation time: {} seconds".format(round(end_time - start_time, 2)))
+    # print("\nCompilation time: {}".format(datetime.timedelta(seconds=round(end_time - start_time, 0))))
 
 
 start()
