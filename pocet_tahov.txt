@@ -1,6 +1,22 @@
-zakladny 8
-cars_1 8
-cars_2 11
-cars_3 4
-cars_4 3
-cars_5 9
+bez pamatania si prejdených vrcholov
+mapa:		hlbka:	pocet stavov:	casy(sekundy):
+	
+zakladny 	8		1247			370,2
+cars_1 	8		37			0,4
+cars_2 	11		200			490
+cars_3 	4		625			0,02
+cars_4 	3		607			0,003
+cars_5 	9		291			229
+cars_6 	5		2156			0,06
+
+
+s pamatanim si prejdených vrcholov
+mapa:		hlbka:	pocet stavov:	casy(sekundy):
+	
+zakladny 	8		1247			
+cars_1 	8		37		
+cars_2 	11		200			
+cars_3 	4		625			
+cars_4 	3		607			
+cars_5 	9		291			
+cars_6 	5		2156			
