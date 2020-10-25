@@ -1,3 +1,4 @@
+import sys
 import time
 import datetime
 from colorama import Fore
@@ -201,13 +202,10 @@ def max_step(crossroad, car_name, direction):
 
 
 # pridá do stacku každé možné rozloženie aut, ak sa také už nenachádza v ceste od koreňa k danému uzlu
-def move_combo(crossroad, car_name, curr_depth, depth, direction):
+def move_combo(crossroad, car_name, curr_depth, direction):
     global cars
     global visited
     steps = max_step(crossroad, car_name, direction)
-    curr_depth += 1
-    if curr_depth > depth:
-        return
     for step in range(1, steps + 1):
         crossroad = [list(x) for x in crossroad]
         operator(crossroad, car_name, direction)
@@ -274,20 +272,21 @@ def dfs(initial_crossroad, depth, debug):
         if curr_depth == depth:
             continue
 
+        curr_depth += 1
         for car_name in cars.keys():  # všetky možné posuny v danej križovatke sa pridajú do stacku
             if cars[car_name]["direction"] == "h":
-                move_combo(crossroad, car_name, curr_depth, depth, "right")
-                move_combo(crossroad, car_name, curr_depth, depth, "left")
+                move_combo(crossroad, car_name, curr_depth, "right")
+                move_combo(crossroad, car_name, curr_depth, "left")
             elif cars[car_name]["direction"] == "v":
-                move_combo(crossroad, car_name, curr_depth, depth, "down")
-                move_combo(crossroad, car_name, curr_depth, depth, "up")
+                move_combo(crossroad, car_name, curr_depth, "down")
+                move_combo(crossroad, car_name, curr_depth, "up")
 
 
 # spustí DFS so zvyšujúcou sa hĺbkou
 def iterative_dfs(debug, file_path, max_depth):
     global cars
     crossroad = init(file_path)
-    for depth in range(max_depth):
+    for depth in range(max_depth + 1):
         end = dfs(crossroad, depth, debug)
         if end == 1:
             return 1
@@ -302,10 +301,9 @@ def start():
     """)
     # file_path = input("Zadajte cestu k súboru\t")       # maps/cars_1.txt
     # max_depth = int(input("Zadajte hĺbku, do ktorej má program prehľadávať:\t"))
-    max_depth = 15
-    file_path = "maps/cars_4.txt"
+    max_depth = 8
+    file_path = "maps/zakladny.txt"
     # debug = input("Stlačte 1 pre spustenie debug módu\t")
-    print()
     debug = False
     if debug == "1":
         debug = True
@@ -327,6 +325,7 @@ def start():
             counter += 1
     else:
         print("No resolution found.")
+    print("\n{} bytes".format(sys.getsizeof(visited) + sys.getsizeof(visited_depths)))
     print("\nCompilation time: {} seconds".format(round(end_time - start_time, 2)))
     # print("\nCompilation time: {}".format(datetime.timedelta(seconds=round(end_time - start_time, 0))))
 

@@ -1,3 +1,4 @@
+import sys
 import time
 from colorama import Fore
 
@@ -14,7 +15,7 @@ path_depths = []
 def init_bez_objektov():
     global cars
     crossroad = [['0'] * 6 for _i in range(6)]
-    file = open("maps/cars_5.txt", "r")
+    file = open("maps/zakladny.txt", "r")
     char_num = 65
     for line in file:
         arr = line.split()
@@ -195,7 +196,7 @@ def max_step_bez_objektov(crossroad, car_name, direction):
     return steps
 
 
-def move_combo_bez_objektov(crossroad, car_name, curr_depth, depth, direction):
+def move_combo_bez_objektov(crossroad, car_name, curr_depth, direction):
     global cars
     global visited
     global visited_depths
@@ -203,9 +204,6 @@ def move_combo_bez_objektov(crossroad, car_name, curr_depth, depth, direction):
     global stack_depths
 
     steps = max_step_bez_objektov(crossroad, car_name, direction)
-    curr_depth += 1
-    if curr_depth > depth:
-        return
     for step in range(1, steps + 1):
         crossroad = [list(x) for x in crossroad]
         operator_bez_objektov(crossroad, car_name, direction)
@@ -218,6 +216,8 @@ def move_combo_bez_objektov(crossroad, car_name, curr_depth, depth, direction):
                 visited[index] = crossroad
                 visited_depths[index] = curr_depth
         else:
+            visited.append(crossroad)
+            visited_depths.append(curr_depth)
             stack.append(crossroad)
             stack_depths.append(curr_depth)
 
@@ -260,8 +260,6 @@ def dfs_bez_objektov(initial_crossroad, depth):
 
         crossroad = stack.pop()
         curr_depth = stack_depths.pop()
-        visited.append(crossroad)
-        visited_depths.append(curr_depth)
         update_path(curr_depth, crossroad)
 
         for i in range(len(crossroad)):     # prvé (červené) auto sa nachádza na konci križovatky
@@ -269,16 +267,17 @@ def dfs_bez_objektov(initial_crossroad, depth):
                 print("{} depth. Finito.".format(depth))
                 return 1
 
-        if curr_depth > depth:
+        if curr_depth == depth:
             continue
 
+        curr_depth += 1
         for car_name in cars.keys():
             if cars[car_name]["direction"] == "h":
-                move_combo_bez_objektov(crossroad, car_name, curr_depth, depth, "right")
-                move_combo_bez_objektov(crossroad, car_name, curr_depth, depth, "left")
+                move_combo_bez_objektov(crossroad, car_name, curr_depth, "right")
+                move_combo_bez_objektov(crossroad, car_name, curr_depth, "left")
             elif cars[car_name]["direction"] == "v":
-                move_combo_bez_objektov(crossroad, car_name, curr_depth, depth, "down")
-                move_combo_bez_objektov(crossroad, car_name, curr_depth, depth, "up")
+                move_combo_bez_objektov(crossroad, car_name, curr_depth, "down")
+                move_combo_bez_objektov(crossroad, car_name, curr_depth, "up")
 
 
 def iterative_dfs_bez_objektov():
@@ -311,6 +310,8 @@ def start_bez_objektov():
             counter += 1
     else:
         print("riesenie sa nenaslo")
+    size = sys.getsizeof(visited) + sys.getsizeof(visited_depths) + sys.getsizeof(path) + sys.getsizeof(path_depths)
+    print("\n{} bytes".format(size))
     print("\nCompilation time: {} seconds".format(round(end_time - start_time, 2)))
 
 
