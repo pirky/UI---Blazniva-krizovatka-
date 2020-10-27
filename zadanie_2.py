@@ -1,4 +1,3 @@
-import sys
 import time
 import datetime
 from colorama import Fore
@@ -299,12 +298,9 @@ def start():
     Dobrý večer, dobrý večer. Hráte hru Multikrižovatkár.
    -------------------------------------------------------
     """)
-    # file_path = input("Zadajte cestu k súboru\t")       # maps/cars_1.txt
-    # max_depth = int(input("Zadajte hĺbku, do ktorej má program prehľadávať:\t"))
-    max_depth = 8
-    file_path = "maps/zakladny.txt"
-    # debug = input("Stlačte 1 pre spustenie debug módu\t")
-    debug = False
+    file_path = input("Zadajte cestu k súboru:  ")       # maps/cars_1.txt
+    max_depth = int(input("Zadajte hĺbku, do ktorej má program prehľadávať:  "))
+    debug = input("Stlačte 1 pre spustenie debug módu\n\t\talebo inú klávesu pre normálny mód:  ")
     if debug == "1":
         debug = True
     else:
@@ -325,9 +321,7 @@ def start():
             counter += 1
     else:
         print("No resolution found.")
-    print("\n{} bytes".format(sys.getsizeof(visited) + sys.getsizeof(visited_depths)))
-    print("\nCompilation time: {} seconds".format(round(end_time - start_time, 2)))
-    # print("\nCompilation time: {}".format(datetime.timedelta(seconds=round(end_time - start_time, 0))))
+    print("\nCompilation time: {}".format(datetime.timedelta(seconds=round(end_time - start_time, 0))))
 
 
 start()

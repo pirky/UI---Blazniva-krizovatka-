@@ -1,4 +1,3 @@
-import sys
 import time
 from colorama import Fore
 
@@ -15,7 +14,7 @@ path_depths = []
 def init_bez_objektov():
     global cars
     crossroad = [['0'] * 6 for _i in range(6)]
-    file = open("maps/zakladny.txt", "r")
+    file = open("maps/cars_6.txt", "r")
     char_num = 65
     for line in file:
         arr = line.split()
@@ -310,8 +309,6 @@ def start_bez_objektov():
             counter += 1
     else:
         print("riesenie sa nenaslo")
-    size = sys.getsizeof(visited) + sys.getsizeof(visited_depths) + sys.getsizeof(path) + sys.getsizeof(path_depths)
-    print("\n{} bytes".format(size))
     print("\nCompilation time: {} seconds".format(round(end_time - start_time, 2)))
 
 
