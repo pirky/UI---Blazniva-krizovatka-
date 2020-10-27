@@ -3,3 +3,7 @@
 /Lib/*
 /Scripts/*
 *.cfg
+*.pptx
+*.docx
+*.pdf
+__pycache__/
